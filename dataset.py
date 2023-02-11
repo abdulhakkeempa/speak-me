@@ -44,9 +44,14 @@ class UnicodeData(Dataset):
             return (pickle.load(open("encode.pkl", "rb")),
                     np.load("decode.npy", mmap_mode="r", encoding="bytes"))
 
+        #regex to filter malayalam,english,symbols,emojis.
+        pattern = r'(?!.*[\u3040-\u30FF\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF\u03E2-\u03EF\u2C80-\u2CF3])^([\u0D00-\u0D7F]+|[A-Za-z]+|[\u00A9|\u00AE|[\u2000-\u3300]|\uD83C[\uDF00-\uDFFF]|\uD83D[\uDC00-\uDE4F]|\uD83E[\uDD10-\uDDFF])+|[\U0001f600-\U0001f64f\U0001f300-\U0001f5ff\U0001f680-\U0001f6ff\U0001f1e0-\U0001f1ff\U00002702-\U000027b0]'
         tokens = np.unique(self.data)
         encode = {ch: i for i, ch in enumerate(tokens)}
-        decode = tokens
+        
+        #tokens after regex filtering.
+        decode = [char for char in tokens if re.match(pattern,char) ]
+        decode = np.array(decode)
 
         pickle.dump(encode, open("encode.pkl", "wb"))
         np.save("decode.npy", decode)
